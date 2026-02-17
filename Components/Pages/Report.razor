@@ -1,0 +1,23 @@
+﻿@page "/report"
+@rendermode InteractiveServer
+@inject PassportBookingReport.Services.PdfService PdfService
+@inject IJSRuntime JS
+
+<h3>Passport Appointment Report</h3>
+
+<button class="btn btn-primary" @onclick="DownloadPdf">
+    تحميل التقرير PDF
+</button>
+
+@code {
+    async Task DownloadPdf()
+    {
+        var pdfBytes = PdfService.GenerateAppointmentPdf();
+        var base64 = Convert.ToBase64String(pdfBytes);
+
+        await JS.InvokeVoidAsync("downloadFile",
+            "PassportReport.pdf",
+            "application/pdf",
+            base64);
+    }
+}
