@@ -1,7 +1,8 @@
-﻿using QuestPDF.Fluent;
+﻿using QRCoder;
+using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using QRCoder;
+using System;
 using System.Text;
 
 namespace PassportBookingReport.Reports;
@@ -123,6 +124,9 @@ public class PassportAppointmentPdf
         }).GeneratePdf();
     }
 
+    //https://passports.gov.sd/appointment/check/validity/1483452115  -- for your internet - testing - public use only
+    // Need to check whether the QR code is accesible in a LAN environment without internet access, as the URL is public and may not be accessible in all environments.
+    // If the QR code needs to work in a LAN environment, consider using a local URL or IP address that can be accessed within the network.
     private byte[] GenerateQr(string url)
     {
         using var qrGenerator = new QRCodeGenerator();
@@ -130,4 +134,43 @@ public class PassportAppointmentPdf
         var qrCode = new PngByteQRCode(qrData);
         return qrCode.GetGraphic(20);
     }
+    //csharp Reports/PassportAppointmentPdf.cs
+//private byte[] GenerateQrForAppointment(string appointmentId, bool preferLan = false, string lanHost = null, string hmacSecret = null)
+//    {
+//        // Build content:
+//        // - preferLan + lanHost -> "http://{lanHost}/appointment/check/validity/{id}"
+//        // - otherwise -> public URL
+//        // - if lanHost is null and preferLan is true, embed a signed payload instead.
+//        string content;
+
+//        if (preferLan && !string.IsNullOrWhiteSpace(lanHost))
+//        {
+//            // Make sure lanHost is reachable by clients (IP or hostname resolvable via local DNS/mDNS)
+//            content = $"http://{lanHost}/appointment/check/validity/{appointmentId}";
+//        }
+//        else if (!preferLan)
+//        {
+//            content = $"https://passports.gov.sd/appointment/check/validity/{appointmentId}";
+//        }
+//        else
+//        {
+//            // Fallback: embed data so it can be validated offline.
+//            // Optionally sign the payload with a server-side secret to prevent tampering.
+//            var payload = new StringBuilder();
+//            payload.Append($"id:{appointmentId};ts:{DateTime.UtcNow:yyyy-MM-ddTHH:mmZ}");
+//            if (!string.IsNullOrEmpty(hmacSecret))
+//            {
+//                using var hmac = new System.Security.Cryptography.HMACSHA256(Encoding.UTF8.GetBytes(hmacSecret));
+//                var sig = Convert.ToHexString(hmac.ComputeHash(Encoding.UTF8.GetBytes(payload.ToString())));
+//                payload.Append($";sig:{sig}");
+//            }
+//            content = payload.ToString();
+//        }
+
+//        // Reuse existing QR generation code
+//        using var qrGenerator = new QRCoder.QRCodeGenerator();
+//        var qrData = qrGenerator.CreateQrCode(content, QRCoder.QRCodeGenerator.ECCLevel.Q);
+//        var qrCode = new QRCoder.PngByteQRCode(qrData);
+//        return qrCode.GetGraphic(20);
+//    }
 }
